@@ -1,4 +1,4 @@
-#!/bin/bash -e -x
+#!/bin/sh -e -x
 #
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
@@ -9,3 +9,5 @@
 # File name: diy-part1.sh
 # Description: OpenWrt DIY script part 1 (Before Update feeds)
 #
+
+true
