@@ -1,4 +1,5 @@
-#!/bin/sh -e -x
+#!/bin/sh
+set -e -x
 
 _version="$(printf "%s" "$REPO_BRANCH" | cut -c 2-)"
 _vermagic="$(curl --retry 5 -L "https://downloads.openwrt.org/releases/${_version}/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic.manifest" | sed -e '/^kernel/!d' -e 's/^.*-\([^-]*\)$/\1/g' | head -n 1)"

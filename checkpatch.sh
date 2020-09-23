@@ -1,4 +1,5 @@
-#!/bin/sh -e -x
+#!/bin/sh
+set -e -x
 
 [ "$(grep 'ALLWIFIBOARDS[ \t]*:=' package/firmware/ipq-wifi/Makefile | wc -l)" = 1 ]
 [ "$(grep '$(eval $(call [^,]*,linksys_ea8300,[^)]*))' package/firmware/ipq-wifi/Makefile | wc -l)" = 1 ]

@@ -1,4 +1,5 @@
-#!/bin/sh -e -x
+#!/bin/sh
+set -e -x
 
 echo '
 define Build/qsdk-ipq-factory-nand
