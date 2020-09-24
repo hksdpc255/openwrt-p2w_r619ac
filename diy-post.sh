@@ -7,8 +7,9 @@ _vermagic="$(curl --retry 5 -L "https://downloads.openwrt.org/releases/${_versio
 OLD_CWD="$(pwd)"
 
 [ "$(find build_dir/ -name .vermagic -exec cat {} \;)" = "$_vermagic" ] && \
-tar -xf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C .. && \
-cd ../openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64/ && \
+mkdir ../openwrt-imagebuilder && \
+tar -xJf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C ../openwrt-imagebuilder && \
+cd ../openwrt-imagebuilder/* && \
 make image PROFILE='p2w_r619ac' && \
 mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin ../openwrt-${_version}-minimal-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin && \
 mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi ../openwrt-${_version}-minimal-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi && \
@@ -74,8 +75,13 @@ mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-12
 make clean && \
 \
 make image PROFILE='p2w_r619ac' PACKAGES='ca-certificates ca-bundle libustream-openssl luci-i18n-base-zh-cn luci-theme-material luci-i18n-firewall-zh-cn luci-i18n-opkg-zh-cn luci-mod-admin-full luci-proto-ipv6 luci-i18n-uhttpd-zh-cn luci-i18n-commands-zh-cn luci-i18n-ttyd-zh-cn luci-proto-ppp rpcd-mod-rrdns luci-proto-hnet -dnsmasq dnsmasq-full block-mount -wpad-basic wpad-openssl libopenssl-devcrypto libopenssl-afalg_sync' FILES=files/ && \
-mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin ../openwrt-${_version}-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin && \
-mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi ../openwrt-${_version}-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi && \
-mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-sysupgrade.bin ../openwrt-${_version}-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-sysupgrade.bin && \
+mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin ../openwrt-${_version}-chn-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin && \
+mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi ../openwrt-${_version}-chn-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi && \
+mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-sysupgrade.bin ../openwrt-${_version}-chn-hwenc-ipq40xx-generic-p2w_r619ac-squashfs-nand-sysupgrade.bin && \
+make clean && \
+\
+make image PROFILE='p2w_r619ac-128m' PACKAGES='ca-certificates ca-bundle libustream-openssl luci-i18n-base-zh-cn luci-theme-material luci-i18n-firewall-zh-cn luci-i18n-opkg-zh-cn luci-mod-admin-full luci-proto-ipv6 luci-i18n-uhttpd-zh-cn luci-i18n-commands-zh-cn luci-i18n-ttyd-zh-cn luci-proto-ppp rpcd-mod-rrdns luci-proto-hnet -dnsmasq dnsmasq-full block-mount -wpad-basic wpad-openssl libopenssl-devcrypto libopenssl-afalg_sync' FILES=files/ && \
+mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-128m-squashfs-nand-factory.ubi ../openwrt-${_version}-chn-hwenc-ipq40xx-generic-p2w_r619ac-128m-squashfs-nand-factory.ubi && \
+mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-128m-squashfs-nand-sysupgrade.bin ../openwrt-${_version}-chn-hwenc-ipq40xx-generic-p2w_r619ac-128m-squashfs-nand-sysupgrade.bin && \
 make clean && \
 mv ../*.bin ../*.ubi "$OLD_CWD/bin/targets/ipq40xx/generic/"
