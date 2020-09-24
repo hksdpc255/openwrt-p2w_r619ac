@@ -31,7 +31,8 @@ env:
   DIY_P1_SH: diy-part1.sh
   DIY_P2_SH: diy-part2.sh
   DIY_POST_SH: diy-post.sh
-  SSH_ACTIONS: false
+  SSH_ACTIONS: true
+  SSH_BEFORE_BUILD: false
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -86,9 +87,9 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: SSH connection to Actions
+    - name: SSH connection to Actions before build
       uses: P3TERX/debugger-action@main
-      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+      if: ( env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh') ) && env.SSH_BEFORE_BUILD == 'true'
 
     - name: Download package
       id: package
@@ -99,7 +100,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
+    - name: Compile OpenWrt
       id: compile
       run: |
         cd openwrt
@@ -109,8 +110,18 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' | head -n 1 > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)"
         echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
+
+    - name: Generate firmware
+      id: genfirmware
+      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+      run: |
         chmod +x $GITHUB_WORKSPACE/$DIY_POST_SH
+        cd openwrt
         $GITHUB_WORKSPACE/$DIY_POST_SH
+
+    - name: SSH connection to Actions when failed
+      uses: P3TERX/debugger-action@main
+      if: ( env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh') ) && ( steps.package.outcome != 'success' || steps.compile.outputs.status != 'success' || steps.genfirmware.outcome != 'success' )
 
     - name: Check space usage
       if: (!cancelled())

@@ -8,7 +8,7 @@ OLD_CWD="$(pwd)"
 
 [ "$(find build_dir/ -name .vermagic -exec cat {} \;)" = "$_vermagic" ] && \
 mkdir ../openwrt-imagebuilder && \
-tar -xJf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C ../openwrt-imagebuilder && \
+tar -xJpf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C ../openwrt-imagebuilder && \
 ( cd ../openwrt-imagebuilder/* || (
     ls -all ../openwrt-imagebuilder/ ../openwrt-imagebuilder/* || true
     whoami || true
