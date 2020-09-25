@@ -7,9 +7,9 @@ _vermagic="$(curl --retry 5 -L "https://downloads.openwrt.org/releases/${_versio
 OLD_CWD="$(pwd)"
 
 [ "$(find build_dir/ -name .vermagic -exec cat {} \;)" = "$_vermagic" ] && \
-mkdir /tmp/imb && \
-tar -xJf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C /tmp/imb && \
-cd /tmp/imb/* && \
+mkdir ~/imb && \
+tar -xJf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C ~/imb && \
+cd ~/imb/* && \
 make image PROFILE='p2w_r619ac' && \
 mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin ../openwrt-${_version}-minimal-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.bin && \
 mv bin/targets/ipq40xx/generic/openwrt-${_version}-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi ../openwrt-${_version}-minimal-ipq40xx-generic-p2w_r619ac-squashfs-nand-factory.ubi && \
