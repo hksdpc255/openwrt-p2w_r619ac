@@ -6,6 +6,14 @@ _vermagic="$(curl --retry 5 -L "https://downloads.openwrt.org/releases/${_versio
 
 OLD_CWD="$(pwd)"
 
+cd bin/targets/*/*
+mv openwrt-imagebuilder-* openwrt-sdk-* ..
+rm -rf packages
+tar -c * | xz -z -e -9 -T 0 > "../$(ls | grep -i "openwrt-.*-sysupgrade.bin" | head -n 1 | cut -d "*" -f 2 | cut -d - -f 1-5)-firmware.tar.xz"
+rm -rf *
+mv ../openwrt-imagebuilder-* ../openwrt-sdk-* ../*-firmware.tar.xz .
+cd "$OLD_CWD"
+
 [ "$(find build_dir/ -name .vermagic -exec cat {} \;)" = "$_vermagic" ] && \
 mkdir ~/imb && \
 tar -xJf bin/targets/ipq40xx/generic/openwrt-imagebuilder-${_version}-ipq40xx-generic.Linux-x86_64.tar.xz -C ~/imb && \

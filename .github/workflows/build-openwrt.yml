@@ -106,11 +106,13 @@ jobs:
         cd openwrt
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
-        echo "::set-output name=status::success"
-        echo "::set-env name=SDK_NAME::$( basename openwrt/bin/targets/*/*/openwrt-sdk-* )"
-        echo "::set-env name=IMBUILDER_NAME::$( basename openwrt/bin/targets/*/*/openwrt-imagebuilder-* )"
         chmod +x $GITHUB_WORKSPACE/$DIY_POST_SH
         $GITHUB_WORKSPACE/$DIY_POST_SH
+        echo "::set-output name=status::success"
+        echo "::set-env name=SDK_NAME::$( basename bin/targets/*/*/openwrt-sdk-* )"
+        echo "::set-env name=IMBUILDER_NAME::$( basename bin/targets/*/*/openwrt-imagebuilder-* )"
+        echo "::set-env name=FIRMWARE_FILENAME::$( basename bin/targets/*/*/*-firmware.tar.xz )"
+        echo "::set-env name=TARGET_DIR::$( readlink -f bin/targets/*/* )"
 
     - name: SSH connection to Actions when failed
       uses: P3TERX/debugger-action@main
@@ -125,45 +127,25 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.IMBUILDER_NAME }}
-        path: ${{ env.FIRMWARE }}/openwrt-imagebuilder-*
+        path: ${{ env.TARGET_DIR }}/openwrt-imagebuilder-*
 
     - name: Upload SDK
       uses: actions/upload-artifact@main
       if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.SDK_NAME }}
-        path: ${{ env.FIRMWARE }}/openwrt-sdk-*
+        path: ${{ env.TARGET_DIR }}/openwrt-sdk-*
 
-    - name: Organize files and print checksums
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages openwrt-imagebuilder-* openwrt-sdk-*
-        tar -c * | xz -z -e -9 -T 0 > "../$(ls | grep -i 'openwrt-.*-sysupgrade.bin' | head -n 1 | cut -d '*' -f 2 | cut -d - 1-5)-firmware.tar.xz"
-        cat *sums
-        sha256sums ../*.xz
-        echo "::set-env name=FIRMWARE_FILENAME::$( basename ../*.xz )"
-        echo "::set-env name=FIRMWARE::$( readlink -f ../*.xz )"
-        echo "::set-output name=status::success"
-
-    - name: Upload firmware directory
+    - name: Upload firmware
       uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+      if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.FIRMWARE_FILENAME }}
-        path: ${{ env.FIRMWARE }}
+        path: ${{ env.TARGET_DIR }}/*-firmware.tar.xz
 
-    - name: Upload firmware to cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+    - name: Print checksums
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-
-    - name: Upload firmware to WeTransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        cd openwrt/bin/targets/*/*
+        cat *sums
+        sha256sums ../*.xz
