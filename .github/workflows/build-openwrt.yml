@@ -28,15 +28,12 @@ env:
   REPO_URL: https://github.com/openwrt/openwrt
   REPO_BRANCH: v19.07.4
   FEEDS_CONF: feeds.conf.default
-  DIY_P1_SH: diy-part1.sh
-  DIY_P2_SH: diy-part2.sh
-  DIY_POST_SH: diy-post.sh
+  DIY_P1_SH: pre-feeds.sh
+  DIY_P2_SH: pre-configure.sh
+  DIY_POST_SH: post-build.sh
   SSH_ACTIONS: true
   SSH_BEFORE_BUILD: false
-  UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_COWTRANSFER: false
-  UPLOAD_WETRANSFER: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -122,30 +119,44 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+    - name: Upload checksums
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.IMBUILDER_NAME }}
+        path: ${{ env.TARGET_DIR }}/*sums
+        if-no-files-found: error
+
     - name: Upload imagebuilder
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.IMBUILDER_NAME }}
         path: ${{ env.TARGET_DIR }}/openwrt-imagebuilder-*
+        if-no-files-found: error
 
     - name: Upload SDK
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.SDK_NAME }}
         path: ${{ env.TARGET_DIR }}/openwrt-sdk-*
+        if-no-files-found: error
 
     - name: Upload firmware
       uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success'
       with:
         name: ${{ env.FIRMWARE_FILENAME }}
         path: ${{ env.TARGET_DIR }}/*-firmware.tar.xz
+        if-no-files-found: error
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@main
+      if: steps.compile.outputs.status != 'success'
+      with:
+        name: fallback_artifacts
+        path: ${{ env.TARGET_DIR }}
+        if-no-files-found: error
 
     - name: Print checksums
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        cat *sums
-        sha256sums ../*.xz
+        sha256sums *
