@@ -95,5 +95,5 @@ xz -d -c ../openwrt-imagebuilder-* | xz -z -e -9 -T 0 > "$(basename ../openwrt-i
 xz -d -c ../openwrt-sdk-* | xz -z -e -9 -T 0 > "$(basename ../openwrt-sdk-*)"
 mv ../*-firmware.tar.xz .
 rm -f ../openwrt-imagebuilder-* ../openwrt-sdk-*
-sha256sums * > ../sha256sums
+sha256sum * > ../sha256sums
 mv ../sha256sums .

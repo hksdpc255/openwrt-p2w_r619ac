@@ -31,8 +31,6 @@ env:
   DIY_P1_SH: pre-feeds.sh
   DIY_P2_SH: pre-configure.sh
   DIY_POST_SH: post-build.sh
-  SSH_ACTIONS: true
-  SSH_BEFORE_BUILD: false
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
 
@@ -84,10 +82,6 @@ jobs:
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: SSH connection to Actions before build
-      uses: P3TERX/debugger-action@main
-      if: ( env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh') ) && env.SSH_BEFORE_BUILD == 'true'
-
     - name: Download package
       id: package
       run: |
@@ -111,13 +105,17 @@ jobs:
         echo "::set-env name=FIRMWARE_FILENAME::$( basename bin/targets/*/*/*-firmware.tar.xz )"
         echo "::set-env name=TARGET_DIR::$( readlink -f bin/targets/*/* )"
 
-    - name: SSH connection to Actions when failed
-      uses: P3TERX/debugger-action@main
-      if: ( env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh') ) && steps.compile.outputs.status != 'success'
-
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
+
+    - name: Upload artifacts if failed
+      uses: actions/upload-artifact@main
+      if: (!cancelled()) && !(steps.compile.outputs.status == 'success')
+      with:
+        name: fallback_artifacts
+        path: ${{ env.TARGET_DIR }}
+        if-no-files-found: error
 
     - name: Upload checksums
       uses: actions/upload-artifact@main
@@ -147,16 +145,8 @@ jobs:
         path: ${{ env.TARGET_DIR }}/*-firmware.tar.xz
         if-no-files-found: error
 
-    - name: Upload firmware
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status != 'success'
-      with:
-        name: fallback_artifacts
-        path: ${{ env.TARGET_DIR }}
-        if-no-files-found: error
-
     - name: Print checksums
       if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        sha256sums *
+        sha256sum *
