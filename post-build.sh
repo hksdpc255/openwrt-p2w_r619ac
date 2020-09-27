@@ -88,12 +88,12 @@ mv ../*.bin ../*.ubi "$OLD_CWD/bin/targets/ipq40xx/generic/"
 
 cd "$OLD_CWD/bin/targets"/*/*
 mv openwrt-imagebuilder-* openwrt-sdk-* ..
-rm -rf packages *sums
-tar -c * | xz -z -e -9 -T 0 > "../$(ls | grep -i "openwrt-.*-sysupgrade.bin" | head -n 1 | cut -d "*" -f 2 | cut -d - -f 1-5)-firmware.tar.xz"
+rm -rf packages
+tar -c * | xz -z -e -9 -T 0 > "../$(grep -i "openwrt-.*-sysupgrade.bin" *sums | head -n 1 | cut -d "*" -f 2 | cut -d - -f 1-5)-firmware.tar.xz"
 rm -rf *
 xz -d -c ../openwrt-imagebuilder-* | xz -z -e -9 -T 0 > "$(basename ../openwrt-imagebuilder-*)"
 xz -d -c ../openwrt-sdk-* | xz -z -e -9 -T 0 > "$(basename ../openwrt-sdk-*)"
 mv ../*-firmware.tar.xz .
-rm -f ../openwrt-imagebuilder-* ../openwrt-sdk-*
+rm -f ../openwrt-imagebuilder-* ../openwrt-sdk-* *sums
 sha256sum * > ../sha256sums
 mv ../sha256sums .
