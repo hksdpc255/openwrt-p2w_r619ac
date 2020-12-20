@@ -17,8 +17,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'build_cnt'
 #  schedule:
 #    - cron: 0 8 * * 5
 #  watch:
@@ -33,6 +31,7 @@ env:
   DIY_POST_SH: post-build.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
 jobs:
   build:
